@@ -1,0 +1,31 @@
+{
+  "name": "map-venus",
+  "private": false,
+  "version": "0.0.17",
+  "type": "module",
+  "files": ["dist"],
+  "license": "ISC",
+  "typings": "./dist/index.d.ts",
+  "main": "./dist/map-venus.umd.cjs",
+  "module": "./dist/map-venus.js",
+  "exports": {
+    ".": {
+      "import": "./dist/map-venus.js",
+      "require": "./dist/map-venus.umd.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "vue": "^3.3.4",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "@types/node": "^20.9.0",
+    "vite-plugin-dts": "^3.6.3"
+  },
+  "peerDependencies": {
+    "ol": "^8.1.0",
+    "@supermap/iclient-ol": "^11.0.1"
+  }
+}
