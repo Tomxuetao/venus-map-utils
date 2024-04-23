@@ -1,13 +1,13 @@
-import { Map, View } from 'ol'
-import { XYZ } from 'ol/source'
 import { defaults } from 'ol/control'
 import TileLayer from 'ol/layer/Tile'
 
-import { Feature, Overlay } from 'ol'
-import { Type } from "ol/geom/Geometry"
 import { Point, Geometry } from 'ol/geom'
-import { Vector as VectorLayer } from 'ol/layer'
-import { Vector as VectorSource } from 'ol/source'
+import RasterSource from 'ol/source/Raster'
+import VectorImageLayer from 'ol/layer/Image'
+import { Layer, Vector as VectorLayer } from 'ol/layer'
+import { Collection, Map, View, Feature, Overlay } from 'ol'
+
+import { Vector as VectorSource, Source, XYZ } from 'ol/source'
 
 import {
   Icon,
@@ -21,38 +21,116 @@ import {
 
 import { GeoJSON } from "ol/format"
 import { FeatureLike } from "ol/Feature"
+import { StyleLike } from "ol/style/Style"
+import { FlatStyleLike } from "ol/style/flat"
 import { getArea, getLength } from "ol/sphere"
 
 import { Draw, Select } from "ol/interaction"
 
-
-import { Options as OverlayOptions } from "ol/Overlay"
-
-// @ts-ignore
-import { TileSuperMapRest } from '@supermap/iclient-ol/mapping/TileSuperMapRest'
+import { type Options as OverlayOptions } from "ol/Overlay"
+import { Type } from "ol/geom/Geometry";
 
 export interface CustomMap extends Map {
   activeBaseLayer?: string
   changeBaseLayer?: () => void
+  removeLayerByName?: (name: string) => void
+  getLayerByName?: (name: string) => Layer<Source> | undefined
+  changeLayersByNames?: (activeNames: Array<string>, allLayerNames: Array<string>) => void
+}
+
+export type LayerConfig = {
+  zIndex?: number,
+  visible?: boolean,
+  minZoom?: number,
+  maxZoom?: number,
+  layerName: string
+}
+
+export type DataItemConfig = {
+  lng: string | Number
+  lat: string | Number
+  img: string | undefined
+  activeImg?: string | undefined
+  text?: string
+  offsetX?: number
+  offsetY?: number
+  scale?: number
+  showText?: boolean
+  anchor?: Array<number>
+  rawData?: any,
+  rotation?: number
+}
+
+export interface ElasticDataItemConfig extends DataItemConfig {
+  smallImg: string
+  largeImg: string
 }
 
 let instance: CustomMap
 
-const validateDate = new Date().getTime() > new Date(2023, 10, 30).getTime()
+/**
+ * 切换Source
+ * @param layer
+ * @param rgbColorArray
+ * @param ratioArray
+ */
+export const changeSource = (layer: Layer, rgbColorArray: number[], ratioArray = [0.05, 0.55, 0.05]) => {
+  const rasterSource = new RasterSource({
+    sources: [layer],
+    operationType: 'image',
+    operation: (pixels, data) => {
+      const reverseFunc = (pixelArray: number[], data: any) => {
+        if (Object.keys(data).includes('rgbColorArray')) {
+          const { rgbColorArray } = data
+          for (let i = 0; i < pixelArray.length; i += 4) {
+            const r = pixelArray[i]
+            const g = pixelArray[i + 1]
+            const b = pixelArray[i + 2]
+
+            const [rRatio, gRatio, bRatio] = ratioArray
+            // 设置灰度值
+            const grey = r * rRatio + g * gRatio + b * bRatio
+            // 将rgb的值替换为灰度值
+            pixelArray[i] = grey
+            pixelArray[i + 1] = grey
+            pixelArray[i + 2] = grey
+            // 黑色，依赖上边的灰色
+            pixelArray[i] = rgbColorArray[0] - pixelArray[i]
+            pixelArray[i + 1] = rgbColorArray[1] - pixelArray[i + 1]
+            pixelArray[i + 2] = rgbColorArray[2] - pixelArray[i + 2]
+          }
+        }
+      }
+      // @ts-ignore
+      reverseFunc(pixels[0].data, data)
+      return pixels[0]
+    },
+    threads: 10
+  })
+  rasterSource.on('beforeoperations', (event) => {
+    event.data.rgbColorArray = rgbColorArray
+  })
+
+  return rasterSource
+}
+
+/**
+ * 转换png样式
+ * @param layer
+ * @param rgbColorArray
+ * @param ratioArray
+ */
+export const changeLayer = (layer: Layer, rgbColorArray: number[], ratioArray: number[]) => {
+  return new VectorImageLayer({
+    source: changeSource(layer, rgbColorArray, ratioArray)
+  })
+}
 
 export const baseLayers = (tk: string) => {
-  if (validateDate) {
-    return {
-      baseImgLayer: new TileLayer(),
-      baseCiaLayer: new TileLayer(),
-      baseVecLayer: new TileLayer(),
-      baseCvaLayer: new TileLayer(),
-    }
-  }
   return {
     // 影像图层
     baseImgLayer: new TileLayer({
-      className: 'img_layer',
+      className: 'img-layer',
       source: new XYZ({
         crossOrigin: 'anonymous',
         tileSize: 256,
@@ -63,7 +141,7 @@ export const baseLayers = (tk: string) => {
 
     // 影像注记
     baseCiaLayer: new TileLayer({
-      className: 'img_layer',
+      className: 'img-layer',
       source: new XYZ({
         crossOrigin: 'anonymous',
         tileSize: 256,
@@ -74,7 +152,7 @@ export const baseLayers = (tk: string) => {
 
     // 矢量图层
     baseVecLayer: new TileLayer({
-      className: 'vec_layer',
+      className: 'vec-layer',
       source: new XYZ({
         crossOrigin: 'anonymous',
         tileSize: 256,
@@ -85,7 +163,7 @@ export const baseLayers = (tk: string) => {
 
     // 矢量注记
     baseCvaLayer: new TileLayer({
-      className: 'vec_layer',
+      className: 'vec-layer',
       source: new XYZ({
         crossOrigin: 'anonymous',
         tileSize: 256,
@@ -96,52 +174,7 @@ export const baseLayers = (tk: string) => {
   }
 }
 
-/**
- * 基础航道图层
- */
-export const baseChannelLayers = () => {
-  if (validateDate) {
-    return {
-      channelVectorLayer: new TileLayer(),
-      channelNetworkLayer: new TileLayer(),
-      channelNetworkLabel: new TileLayer()
-    }
-  }
-  return {
-    // 浙江省航道图
-    channelVectorLayer: new TileLayer({
-      source: new TileSuperMapRest({
-        url: 'http://220.249.101.113:21001/iserver/services/map-jsgis-2/rest/maps/%E6%B5%99%E6%B1%9F%E7%94%B5%E5%AD%90%E8%88%AA%E9%81%93%E5%9B%BE',
-        layer: "hd_channel",
-        crossOrigin: "anonymous"
-      }),
-      zIndex: 3
-    }),
-    // 浙江省航道网
-    channelNetworkLayer: new TileLayer({
-      source: new TileSuperMapRest({
-        url: 'http://220.249.101.113:21001/iserver/services/map-zlh/rest/maps/%E5%85%A8%E7%9C%81%E8%88%AA%E9%81%93%E7%BD%91',
-        layer: "hd_network",
-        crossOrigin: "anonymous"
-      }),
-      zIndex: 3
-    }),
-    // 全省航道注记
-    channelNetworkLabel: new TileLayer({
-      source: new TileSuperMapRest({
-        url: 'http://220.249.101.113:21001/iserver/services/map-zlh/rest/maps/%E5%85%A8%E7%9C%81%E8%88%AA%E9%81%93%E7%BD%91%E6%B3%A8%E8%AE%B0',
-        layer: "hd_zj",
-        crossOrigin: "anonymous"
-      }),
-      zIndex: 3
-    })
-  }
-}
-
 const changeBaseLayer = (map: CustomMap = instance) => {
-  if (validateDate) {
-    return {} as CustomMap
-  }
   const allLayers = map.getAllLayers()
   const { baseImgLayer, baseCiaLayer, baseVecLayer, baseCvaLayer } = baseLayers('c77eddc667c5bed016fded560baf93e7')
   const { activeBaseLayer } = map
@@ -149,39 +182,78 @@ const changeBaseLayer = (map: CustomMap = instance) => {
   tempLayers.forEach((layer) => {
     map.removeLayer(layer)
   })
-  if (activeBaseLayer === 'img_layer') {
+  if (activeBaseLayer === 'img-layer') {
     map.addLayer(baseVecLayer)
     map.addLayer(baseCvaLayer)
-    map.activeBaseLayer = 'vec_layer'
+    map.activeBaseLayer = 'vec-layer'
   } else {
     map.addLayer(baseImgLayer)
     map.addLayer(baseCiaLayer)
-    map.activeBaseLayer = 'img_layer'
+    map.activeBaseLayer = 'img-layer'
   }
 }
 
-export const createMapInstance = (config = {
+const removeLayerByName = (name: string) => {
+  const tempLayer = instance.getAllLayers().find(item => item.getClassName() === name)
+  if (tempLayer) {
+    instance.removeLayer(tempLayer)
+  }
+}
+
+/**
+ * 切换图层的显示、隐藏
+ * @param activeNames
+ * @param allLayerNames
+ */
+const changeLayersByNames = (activeNames: Array<string>, allLayerNames: Array<string>) => {
+  const changeLayers = instance.getAllLayers().filter(item => allLayerNames?.includes(item.getClassName()))
+
+  changeLayers.forEach(layer => {
+    layer.setVisible(activeNames?.includes(layer.getClassName()))
+  })
+}
+
+const getLayerByName = (name: string) => {
+  return instance.getAllLayers().find(item => item.getClassName() === name)
+}
+
+/**
+ * 创建地图实例
+ * @param rgb
+ * @param ratioArray
+ * @param config
+ */
+export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05, 0.55, 0.05], config = {
   zoom: 12,
-  maxZoom: 20,
+  maxZoom: 18,
   minZoom: 10,
   projection: 'EPSG:4326',
-  center: [121.428599, 28.661378]
+  center: [121.428599, 28.661378],
+  token: 'c77eddc667c5bed016fded560baf93e7'
 }) => {
-  if (validateDate) {
-    return new Map()
+  if (!config) {
+    config = {
+      zoom: 12,
+      maxZoom: 18,
+      minZoom: 10,
+      projection: 'EPSG:4326',
+      center: [121.428599, 28.661378],
+      token: 'c77eddc667c5bed016fded560baf93e7'
+    }
   }
-  const { baseVecLayer, baseCvaLayer } = baseLayers('c77eddc667c5bed016fded560baf93e7')
+  const { baseVecLayer, baseCvaLayer } = baseLayers(config.token || 'c77eddc667c5bed016fded560baf93e7')
 
   if (!instance) {
     instance = new Map({
-      layers: [baseVecLayer, baseCvaLayer],
+      layers: rgb ? [changeLayer(baseVecLayer, rgb, ratioArray), changeLayer(baseCvaLayer, rgb, ratioArray)] : [baseVecLayer, baseCvaLayer],
       view: new View(Object.assign(
           {
-            zoom: 12,
-            maxZoom: 20,
+            zoom: 8,
             minZoom: 10,
+            maxZoom: 20,
             projection: 'EPSG:4326',
-            center: [121.428599, 28.661378]
+            center: [121.428599, 28.661378],
+            smoothExtentConstraint: false
           },
           config
         )
@@ -192,8 +264,11 @@ export const createMapInstance = (config = {
         rotate: false
       })
     })
-    instance.activeBaseLayer = 'vec_layer'
+    instance.activeBaseLayer = 'vec-layer'
+    instance.getLayerByName = getLayerByName
     instance.changeBaseLayer = changeBaseLayer
+    instance.removeLayerByName = removeLayerByName
+    instance.changeLayersByNames = changeLayersByNames
     instance.on('pointermove', (evt: any) => {
       instance.getTargetElement().style.cursor = instance.hasFeatureAtPixel(evt.pixel) ? 'pointer' : ''
     })
@@ -201,32 +276,11 @@ export const createMapInstance = (config = {
   }
   return instance
 }
-
-type LayerConfig = {
-  layerName?: string
-}
-
-type DataItemConfig = {
-  lng: string | Number
-  lat: string | Number
-  img: string | undefined
-  activeImg: string | undefined
-  text?: string
-  offsetX?: number
-  offsetY?: number
-  scale?: number
-  showText?: boolean
-  anchor?: Array<number>
-}
-
 /**
  * 创建文本标注
  * @param item
  */
 export const createText = (item: DataItemConfig) => {
-  if (validateDate) {
-    return new Text()
-  }
   return new Text({
     text: item.text,
     offsetY: item.offsetY,
@@ -246,9 +300,6 @@ export const createText = (item: DataItemConfig) => {
  * @param config
  */
 export const createOverlay = (config: OverlayOptions = { id: 'popup-container', positioning: 'center-center' }) => {
-  if (validateDate) {
-    return new Overlay({})
-  }
   return new Overlay(Object.assign(
     {
       element: document.getElementById(<string>config.id) || undefined
@@ -263,17 +314,24 @@ export const createOverlay = (config: OverlayOptions = { id: 'popup-container', 
  * @param active
  */
 export const createIconStyle = (item: DataItemConfig, active: boolean = false) => {
-  if (validateDate) {
-    return new Style()
-  }
   return new Style({
     image: new Icon({
+      scale: item.scale || 1,
+      rotation: item.rotation || 0,
       anchor: item.anchor || [0.5, 1],
-      src: active ? item.activeImg : item.img,
-      scale: item.scale || 1
+      src: active ? (item.activeImg ? item.activeImg : item.img) : item.img
     }),
     text: item.showText ? createText(item) : undefined
   })
+}
+
+export const createMarker = (item: DataItemConfig, config: LayerConfig) => {
+  const feature = new Feature({
+    geometry: new Point([+item.lng, +item.lat]),
+    data: Object.assign({}, item || {}, { layerName: config.layerName })
+  })
+  feature.setStyle(createIconStyle(item))
+  return feature
 }
 
 /**
@@ -282,44 +340,89 @@ export const createIconStyle = (item: DataItemConfig, active: boolean = false) =
  * @param config
  */
 export const createMarkersLayer = (dataList: Array<DataItemConfig>, config: LayerConfig) => {
-  if (validateDate) {
-    return new VectorLayer()
-  }
-  const { layerName } = config
+  const { layerName, visible = true, zIndex = 10 } = config
   const markSource = new VectorSource()
 
   dataList.forEach(item => {
-    const feature = new Feature({
-      geometry: new Point([+item.lng, +item.lat]),
-      data: Object.assign({}, item || {}, { layerName })
-    })
-    feature.setStyle(createIconStyle(item))
+    const feature = createMarker(item, config)
     markSource.addFeature(feature)
   })
+
   return new VectorLayer({
-    zIndex: 10,
+    zIndex: zIndex,
+    visible: visible,
     source: markSource,
     className: layerName || 'marker-layer'
   })
+}
+
+const setElasticMarkerStyle = (featureList: Feature<Geometry>[] | Collection<Feature>, curZoom: number) => {
+  const changeStyle = (featureList: Feature<Geometry>[] | Collection<Feature>, imgKey: string) => {
+    featureList.forEach(feature => {
+      const config = feature.get('data')
+      if (!config.isSelected) {
+        feature.setStyle(createIconStyle(Object.assign({}, config, { img: config[imgKey] }), false))
+      }
+    })
+  }
+
+  changeStyle(featureList, curZoom >= 14 ? 'largeImg' : curZoom >= 11 ? 'smallImg' : 'img')
+}
+
+/**
+ * 提供给外部关闭弹窗时，切换选中状态
+ * @param featureList
+ */
+export const changeUnselectStyle = (featureList: Collection<Feature>) => {
+  featureList.forEach(feature => {
+    const config = feature.get('data')
+    feature.set('data', { ...config, isSelected: false })
+    if (config.isElastic) {
+      setElasticMarkerStyle([feature], instance.getView().getZoom()!)
+    } else {
+      feature.setStyle(createIconStyle(config, false))
+    }
+  })
+  featureList.clear()
+}
+
+/**
+ * 创建有弹性的Marker标注图层
+ * @param dataList
+ * @param config
+ */
+export const createElasticMarkerLayer = (dataList: Array<ElasticDataItemConfig>, config: LayerConfig) => {
+  const tempDataList = dataList.map(item => {
+    return {
+      ...item,
+      isElastic: true
+    }
+  })
+
+  const vectorLayer = createMarkersLayer(tempDataList, config)
+  const featureList = vectorLayer.getSource()!.getFeatures()
+  setElasticMarkerStyle(featureList, instance.getView().getZoom()!)
+
+  instance.getView().on('change:resolution', ({ target }) => {
+    const curZoom = target.get('zoom')
+    setElasticMarkerStyle(featureList, curZoom)
+  })
+
+  return vectorLayer
 }
 
 
 /**
  * 创建交互事件
  * @param layerNames
- * @param rawDataKey
  * @param selectedHandler
  * @param unSelectHandler
  */
 export const createLayerSelectByNames = (
   layerNames: Array<string>,
-  rawDataKey: string = 'data',
   selectedHandler?: (feature: Feature) => void,
-  unSelectHandler?: () => void
+  unSelectHandler?: (feature: Feature) => void
 ) => {
-  if (validateDate) {
-    return new Select()
-  }
   const interaction = new Select({
     style: null,
     layers: (layer) => layerNames.includes(layer.getClassName())
@@ -329,14 +432,24 @@ export const createLayerSelectByNames = (
     const { deselected, selected } = evt
     if (deselected.length) {
       const feature = deselected[0]
-      const config = feature.get(rawDataKey)
-      feature.setStyle(createIconStyle(config))
-      unSelectHandler?.()
+      let config = feature.get('data')
+      if (config.isElastic) {
+        feature.set('data', Object.assign(config, { isSelected: false }))
+        setElasticMarkerStyle([feature], instance.getView().getZoom()!)
+      } else {
+        feature.setStyle(createIconStyle(Object.assign(config, { isSelected: false }), false))
+      }
+      unSelectHandler?.(feature)
     }
     if (selected.length) {
       const feature = selected[0]
-      const config = feature.get(rawDataKey)
-      feature.setStyle(createIconStyle(config, true))
+      const config = feature.get('data')
+      if (config.isElastic) {
+        feature.set('data', Object.assign(config, { isSelected: true }))
+        setElasticMarkerStyle([feature], instance.getView().getZoom()!)
+      } else {
+        feature.setStyle(createIconStyle(Object.assign(config, { isSelected: true }), true))
+      }
       selectedHandler?.(feature)
     }
   })
@@ -365,10 +478,16 @@ const formatLength = (line: Geometry) => {
   return output
 }
 
-export const getStyle = (feature: FeatureLike, drawStyle: Style | undefined = undefined) => {
+
+/**
+ *
+ * @param feature
+ * @param drawStyle
+ */
+export const getDrawStyle = (feature: FeatureLike, drawStyle: Style | undefined = drawDefaultStyle) => {
   const labelStyle = new Style({
     text: new Text({
-      font: '14px Calibri,sans-serif',
+      font: '14px',
       fill: new Fill({
         color: 'rgba(255, 255, 255, 1)'
       }),
@@ -407,7 +526,7 @@ export const getStyle = (feature: FeatureLike, drawStyle: Style | undefined = un
   }
   if (label) {
     labelStyle.setGeometry(point)
-    labelStyle.getText().setText(label)
+    labelStyle.getText()!.setText(label)
     styles.push(labelStyle)
   }
   return styles
@@ -432,18 +551,47 @@ const drawDefaultStyle: Style = new Style({
     })
   })
 })
+
+/**
+ * 飞到对应点位
+ * @param center
+ * @param zoom
+ */
+export const flyToAnimate = (center: Array<any>[number], zoom?: number) => {
+  const view = instance.getView()
+  const tempZoom = view.getZoom()
+  view.animate({
+    center: center,
+    duration: 2000,
+  })
+  if (!zoom) {
+    view.animate(
+      // @ts-ignore
+      { zoom: tempZoom - 2, duration: 2000 / 2 },
+      // @ts-ignore
+      { zoom: tempZoom + 2 > 12 ? 12 : tempZoom + 2, duration: 2000 / 2 }
+    )
+  } else {
+    view.animate(
+      // @ts-ignore
+      { zoom: zoom - 2, duration: 2000 / 2 },
+      // @ts-ignore
+      { zoom: zoom, duration: 2000 / 2 }
+    )
+  }
+}
+
 /**
  * 创建绘制方法
  * @param type
  * @param vectorLayer
  * @param openTip
- * @param drawStyle
  */
-export const createDrawInteraction = (type: Type = 'Point', vectorLayer: VectorLayer<any>, openTip: boolean = false, drawStyle: Style = drawDefaultStyle) => {
+export const createDrawInteraction = (type: Type = 'Point', vectorLayer: VectorLayer<any>, openTip?: boolean) => {
   return new Draw({
     source: vectorLayer.getSource(),
     type: type,
-    style: openTip ? (feature) => getStyle(feature, drawStyle ? drawStyle : drawDefaultStyle) : undefined
+    style: openTip ? (feature) => getDrawStyle(feature, undefined) : undefined
   })
 }
 
@@ -451,44 +599,62 @@ export const createDrawInteraction = (type: Type = 'Point', vectorLayer: VectorL
  * 创建GeoJson图层
  * @param geoJson
  * @param style
+ * @param config
  */
-export const createGeoJsonLayer = (
-  geoJson: GeoJSON, style: Style = new Style({
-    stroke: new Stroke({
-      color: 'red',
-      lineDash: [10],
-      width: 3,
-    }),
-    fill: new Fill({
-      color: 'rgba(0, 0, 255, 0.1)',
-    })
-  })) => {
-  if (validateDate) {
-    return new VectorLayer({})
-  }
-  return new VectorLayer({
+export const createGeoJsonLayer = (geoJson: any, style: StyleLike | FlatStyleLike | null | undefined, config?: LayerConfig) => {
+  const { layerName } = config || {}
+  const layerConfig = Object.assign({
+    className: layerName ? layerName : 'ol-layer',
     source: new VectorSource({
       features: new GeoJSON().readFeatures(geoJson)
     }),
-    style: style,
-    zIndex: 2000
-  })
+    style: style ? style : new Style({
+      stroke: new Stroke({
+        color: 'red',
+        lineDash: [10],
+        width: 3
+      }),
+      fill: new Fill({
+        color: 'rgba(0, 0, 255, 0.1)',
+      })
+    })
+  }, config ? config : {})
+  // @ts-ignore
+  return new VectorLayer(layerConfig)
 }
 
-/**
- * 飞到对应点位
- * @param center
- */
-export const flyToAnimate = (center: Array<any>[number]) => {
-  const view = instance.getView()
-  const zoom = view.getZoom()
-  view.animate({
-    center: center,
-    duration: 2000,
+export const createMoveMarkerLayer = (dataItem: DataItemConfig, config: LayerConfig) => {
+  const marker = createMarker(dataItem, config)
+  const { layerName } = config
+  const vectorSource = new VectorSource({
+    features: [marker]
   })
-  view.animate(
-    // @ts-ignore
-    { zoom: zoom - 1, duration: 2000 / 2 },
-    { zoom: zoom, duration: 2000 / 2 }
-  )
+  const vectorLayer = new VectorLayer({
+    className: layerName ? layerName : 'ol-layer',
+    source: vectorSource
+  })
+
+  vectorLayer.on('postrender', (event) => {
+    console.log(event)
+  })
+
+  instance.addLayer(vectorLayer)
+
+  return {
+    vectorLayer
+  }
+}
+
+
+/**
+ * 废弃地图
+ */
+export const disposeInstance = () => {
+  const layers = instance.getAllLayers()
+  layers.forEach(layer => {
+    instance.removeLayer(layer)
+  })
+  instance.setTarget('')
+  // @ts-ignore
+  instance = undefined
 }
