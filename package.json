@@ -1,7 +1,7 @@
 {
   "name": "map-venus",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "files": [
     "dist"
@@ -19,25 +19,26 @@
   "scripts": {
     "build": "tsc && vite build",
     "changeset": "changeset",
-    "prepare": "husky install",
+    "prepare": "husky",
+    "fix": "eslint . --fix",
     "version": "changeset version",
     "commit": "git add . && git-cz",
-    "preinstall": "npx only-allow pnpm",
-    "fix": "eslint --ext .js,.ts src --fix"
+    "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "@commitlint/cli": "^18.6.1",
-    "@commitlint/config-conventional": "^18.6.3",
     "@types/node": "^20.12.7",
-    "commitizen": "^4.3.0",
-    "eslint": "^8.57.0",
-    "git-cz": "^4.9.0",
-    "husky": "^8.0.3",
-    "nano-staged": "^0.8.0",
-    "typescript": "^5.4.5",
+    "@changesets/cli": "^2.27.1",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
     "vite": "^5.2.10",
-    "vite-plugin-dts": "^3.9.0"
+    "eslint": "^9.1.1",
+    "git-cz": "^4.9.0",
+    "husky": "^9.0.11",
+    "commitizen": "^4.3.0",
+    "typescript": "^5.4.5",
+    "nano-staged": "^0.8.0",
+    "vite-plugin-dts": "^3.9.0",
+    "typescript-eslint": "^7.8.0"
   },
   "config": {
     "commitizen": {
@@ -45,7 +46,7 @@
     }
   },
   "lint-staged": {
-    "*.{vue,js,ts}": "eslint --fix"
+    "*.{ts}": "eslint --fix"
   },
   "browserslist": [
     "> 1%",
@@ -56,7 +57,7 @@
     "pnpm": ">= 8.8.0"
   },
   "nano-staged": {
-    "*.{ts,tsx,js,vue}": "eslint --fix"
+    "*.{ts}": "eslint --fix"
   },
   "peerDependencies": {
     "ol": "^9.1.0"

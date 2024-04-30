@@ -9,26 +9,22 @@ import { Collection, Map, View, Feature, Overlay } from 'ol'
 
 import { Vector as VectorSource, Source, XYZ } from 'ol/source'
 
-import {
-  Icon,
+import {Icon,
   Text,
   Fill,
   Style,
   Stroke,
   RegularShape,
-  Circle as CircleStyle
-} from 'ol/style'
+  Circle as CircleStyle} from 'ol/style'
 
-import { GeoJSON } from "ol/format"
-import { FeatureLike } from "ol/Feature"
-import { StyleLike } from "ol/style/Style"
-import { FlatStyleLike } from "ol/style/flat"
-import { getArea, getLength } from "ol/sphere"
-
-import { Draw, Select } from "ol/interaction"
-
-import { type Options as OverlayOptions } from "ol/Overlay"
-import { Type } from "ol/geom/Geometry";
+import { GeoJSON } from 'ol/format'
+import { Options } from 'ol/Overlay'
+import { Type } from 'ol/geom/Geometry'
+import { FeatureLike } from 'ol/Feature'
+import { StyleLike } from 'ol/style/Style'
+import { Draw, Select } from 'ol/interaction'
+import { FlatStyleLike } from 'ol/style/flat'
+import { getArea, getLength } from 'ol/sphere'
 
 export interface CustomMap extends Map {
   activeBaseLayer?: string
@@ -74,14 +70,14 @@ let instance: CustomMap
  * @param rgbColorArray
  * @param ratioArray
  */
-export const changeSource = (layer: Layer, rgbColorArray: number[], ratioArray = [0.05, 0.55, 0.05]) => {
+export const changeSource = (layer: Layer, rgbColorArray: number[], ratioArray: number[]) => {
   const rasterSource = new RasterSource({
     sources: [layer],
     operationType: 'image',
     operation: (pixels, data) => {
       const reverseFunc = (pixelArray: number[], data: any) => {
         if (Object.keys(data).includes('rgbColorArray')) {
-          const { rgbColorArray } = data
+          const { ratioArray, rgbColorArray } = data
           for (let i = 0; i < pixelArray.length; i += 4) {
             const r = pixelArray[i]
             const g = pixelArray[i + 1]
@@ -108,6 +104,7 @@ export const changeSource = (layer: Layer, rgbColorArray: number[], ratioArray =
     threads: 10
   })
   rasterSource.on('beforeoperations', (event) => {
+    event.data.ratioArray = ratioArray
     event.data.rgbColorArray = rgbColorArray
   })
 
@@ -231,8 +228,9 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
   center: [121.428599, 28.661378],
   token: 'c77eddc667c5bed016fded560baf93e7'
 }) => {
+  let _config = config
   if (!config) {
-    config = {
+    _config = {
       zoom: 12,
       maxZoom: 18,
       minZoom: 10,
@@ -241,7 +239,7 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
       token: 'c77eddc667c5bed016fded560baf93e7'
     }
   }
-  const { baseVecLayer, baseCvaLayer } = baseLayers(config.token || 'c77eddc667c5bed016fded560baf93e7')
+  const { baseVecLayer, baseCvaLayer } = baseLayers(_config.token || 'c77eddc667c5bed016fded560baf93e7')
 
   if (!instance) {
     instance = new Map({
@@ -255,7 +253,7 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
             center: [121.428599, 28.661378],
             smoothExtentConstraint: false
           },
-          config
+        _config
         )
       ),
       controls: defaults({
@@ -299,7 +297,7 @@ export const createText = (item: DataItemConfig) => {
  * 创建Overlay
  * @param config
  */
-export const createOverlay = (config: OverlayOptions = { id: 'popup-container', positioning: 'center-center' }) => {
+export const createOverlay = (config: Options = { id: 'popup-container', positioning: 'center-center' }) => {
   return new Overlay(Object.assign(
     {
       element: document.getElementById(<string>config.id) || undefined
@@ -457,14 +455,14 @@ export const createLayerSelectByNames = (
 }
 
 const formatArea = (polygon: Geometry) => {
-  const area = getArea(polygon, { projection: 'EPSG:4326' });
-  let output;
+  const area = getArea(polygon, { projection: 'EPSG:4326' })
+  let output
   if (area > 10000) {
-    output = Math.round((area / 1000000) * 100) / 100 + ' km\xB2';
+    output = Math.round((area / 1000000) * 100) / 100 + ' km\xB2'
   } else {
-    output = Math.round(area * 100) / 100 + ' m\xB2';
+    output = Math.round(area * 100) / 100 + ' m\xB2'
   }
-  return output;
+  return output
 }
 
 const formatLength = (line: Geometry) => {
@@ -504,7 +502,7 @@ export const getDrawStyle = (feature: FeatureLike, drawStyle: Style | undefined 
       angle: Math.PI,
       displacement: [0, 10],
       fill: new Fill({
-        color: 'rgba(0, 0, 0, 0.7)',
+        color: 'rgba(0, 0, 0, 0.7)'
       })
     })
   })
@@ -559,23 +557,19 @@ const drawDefaultStyle: Style = new Style({
  */
 export const flyToAnimate = (center: Array<any>[number], zoom?: number) => {
   const view = instance.getView()
-  const tempZoom = view.getZoom()
+  const tempZoom = view.getZoom()!
   view.animate({
     center: center,
-    duration: 2000,
+    duration: 2000
   })
   if (!zoom) {
     view.animate(
-      // @ts-ignore
       { zoom: tempZoom - 2, duration: 2000 / 2 },
-      // @ts-ignore
       { zoom: tempZoom + 2 > 12 ? 12 : tempZoom + 2, duration: 2000 / 2 }
     )
   } else {
     view.animate(
-      // @ts-ignore
       { zoom: zoom - 2, duration: 2000 / 2 },
-      // @ts-ignore
       { zoom: zoom, duration: 2000 / 2 }
     )
   }
@@ -615,11 +609,11 @@ export const createGeoJsonLayer = (geoJson: any, style: StyleLike | FlatStyleLik
         width: 3
       }),
       fill: new Fill({
-        color: 'rgba(0, 0, 255, 0.1)',
+        color: 'rgba(0, 0, 255, 0.1)'
       })
     })
   }, config ? config : {})
-  // @ts-ignore
+
   return new VectorLayer(layerConfig)
 }
 
