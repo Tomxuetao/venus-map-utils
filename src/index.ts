@@ -22,9 +22,11 @@ import { Options } from 'ol/Overlay'
 import { Type } from 'ol/geom/Geometry'
 import { FeatureLike } from 'ol/Feature'
 import { StyleLike } from 'ol/style/Style'
-import { Draw, Select } from 'ol/interaction'
 import { FlatStyleLike } from 'ol/style/flat'
 import { getArea, getLength } from 'ol/sphere'
+import { Draw, DragPan, Select } from 'ol/interaction'
+
+export {DragPan}
 
 export interface CustomMap extends Map {
   activeBaseLayer?: string
@@ -224,6 +226,7 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
   zoom: 12,
   maxZoom: 18,
   minZoom: 10,
+  baseLayer: 'vec-layer',
   projection: 'EPSG:4326',
   center: [121.428599, 28.661378],
   token: 'c77eddc667c5bed016fded560baf93e7'
@@ -234,16 +237,23 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
       zoom: 12,
       maxZoom: 18,
       minZoom: 10,
+      baseLayer: 'vec-layer',
       projection: 'EPSG:4326',
       center: [121.428599, 28.661378],
       token: 'c77eddc667c5bed016fded560baf93e7'
     }
   }
-  const { baseVecLayer, baseCvaLayer } = baseLayers(_config.token || 'c77eddc667c5bed016fded560baf93e7')
+  const {
+    baseVecLayer,
+    baseCvaLayer,
+    baseImgLayer,
+    baseCiaLayer
+  } = baseLayers(_config.token || 'c77eddc667c5bed016fded560baf93e7')
 
+  const layers = config.baseLayer === 'img-layer' ? [baseImgLayer, baseCiaLayer] : [baseVecLayer, baseCvaLayer]
   if (!instance) {
     instance = new Map({
-      layers: rgb ? [changeLayer(baseVecLayer, rgb, ratioArray), changeLayer(baseCvaLayer, rgb, ratioArray)] : [baseVecLayer, baseCvaLayer],
+      layers: rgb ? [changeLayer(layers[0], rgb, ratioArray), changeLayer(layers[1], rgb, ratioArray)] : layers,
       view: new View(Object.assign(
           {
             zoom: 8,
@@ -253,7 +263,7 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
             center: [121.428599, 28.661378],
             smoothExtentConstraint: false
           },
-        _config
+          _config
         )
       ),
       controls: defaults({
@@ -262,7 +272,7 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
         rotate: false
       })
     })
-    instance.activeBaseLayer = 'vec-layer'
+    instance.activeBaseLayer = _config.baseLayer
     instance.getLayerByName = getLayerByName
     instance.changeBaseLayer = changeBaseLayer
     instance.removeLayerByName = removeLayerByName
@@ -291,7 +301,6 @@ export const createText = (item: DataItemConfig) => {
     })
   })
 }
-
 
 /**
  * 创建Overlay
@@ -583,6 +592,7 @@ export const flyToAnimate = (center: Array<any>[number], zoom?: number) => {
  */
 export const createDrawInteraction = (type: Type = 'Point', vectorLayer: VectorLayer<any>, openTip?: boolean) => {
   return new Draw({
+    // @ts-ignore
     source: vectorLayer.getSource(),
     type: type,
     style: openTip ? (feature) => getDrawStyle(feature, undefined) : undefined
@@ -652,3 +662,4 @@ export const disposeInstance = () => {
   // @ts-ignore
   instance = undefined
 }
+
