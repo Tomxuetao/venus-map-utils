@@ -24,29 +24,30 @@ import { FeatureLike } from 'ol/Feature'
 import { StyleLike } from 'ol/style/Style'
 import { FlatStyleLike } from 'ol/style/flat'
 import { getArea, getLength } from 'ol/sphere'
-import { Draw, DragPan, Select } from 'ol/interaction'
-
-export {DragPan}
+import { Draw, Select } from 'ol/interaction'
 
 export interface CustomMap extends Map {
   activeBaseLayer?: string
   changeBaseLayer?: () => void
   removeLayerByName?: (name: string) => void
   getLayerByName?: (name: string) => Layer<Source> | undefined
-  changeLayersByNames?: (activeNames: Array<string>, allLayerNames: Array<string>) => void
+  changeLayersByNames?: (
+    activeNames: Array<string>,
+    allLayerNames: Array<string>,
+  ) => void
 }
 
 export type LayerConfig = {
-  zIndex?: number,
-  visible?: boolean,
-  minZoom?: number,
-  maxZoom?: number,
+  zIndex?: number
+  visible?: boolean
+  minZoom?: number
+  maxZoom?: number
   layerName: string
 }
 
 export type DataItemConfig = {
-  lng: string | Number
-  lat: string | Number
+  lng: string | number
+  lat: string | number
   img: string | undefined
   activeImg?: string | undefined
   text?: string
@@ -55,7 +56,7 @@ export type DataItemConfig = {
   scale?: number
   showText?: boolean
   anchor?: Array<number>
-  rawData?: any,
+  rawData?: any
   rotation?: number
 }
 
@@ -72,7 +73,11 @@ let instance: CustomMap
  * @param rgbColorArray
  * @param ratioArray
  */
-export const changeSource = (layer: Layer, rgbColorArray: number[], ratioArray: number[]) => {
+export const changeSource = (
+  layer: Layer,
+  rgbColorArray: number[],
+  ratioArray: number[]
+) => {
   const rasterSource = new RasterSource({
     sources: [layer],
     operationType: 'image',
@@ -119,7 +124,11 @@ export const changeSource = (layer: Layer, rgbColorArray: number[], ratioArray: 
  * @param rgbColorArray
  * @param ratioArray
  */
-export const changeLayer = (layer: Layer, rgbColorArray: number[], ratioArray: number[]) => {
+export const changeLayer = (
+  layer: Layer,
+  rgbColorArray: number[],
+  ratioArray: number[]
+) => {
   return new VectorImageLayer({
     source: changeSource(layer, rgbColorArray, ratioArray)
   })
@@ -175,9 +184,13 @@ export const baseLayers = (tk: string) => {
 
 const changeBaseLayer = (map: CustomMap = instance) => {
   const allLayers = map.getAllLayers()
-  const { baseImgLayer, baseCiaLayer, baseVecLayer, baseCvaLayer } = baseLayers('c77eddc667c5bed016fded560baf93e7')
+  const { baseImgLayer, baseCiaLayer, baseVecLayer, baseCvaLayer } = baseLayers(
+    'c77eddc667c5bed016fded560baf93e7'
+  )
   const { activeBaseLayer } = map
-  const tempLayers = allLayers.filter(item => item.getClassName() === activeBaseLayer)
+  const tempLayers = allLayers.filter(
+    (item) => item.getClassName() === activeBaseLayer
+  )
   tempLayers.forEach((layer) => {
     map.removeLayer(layer)
   })
@@ -193,7 +206,9 @@ const changeBaseLayer = (map: CustomMap = instance) => {
 }
 
 const removeLayerByName = (name: string) => {
-  const tempLayer = instance.getAllLayers().find(item => item.getClassName() === name)
+  const tempLayer = instance
+    .getAllLayers()
+    .find((item) => item.getClassName() === name)
   if (tempLayer) {
     instance.removeLayer(tempLayer)
   }
@@ -204,16 +219,21 @@ const removeLayerByName = (name: string) => {
  * @param activeNames
  * @param allLayerNames
  */
-const changeLayersByNames = (activeNames: Array<string>, allLayerNames: Array<string>) => {
-  const changeLayers = instance.getAllLayers().filter(item => allLayerNames?.includes(item.getClassName()))
+const changeLayersByNames = (
+  activeNames: Array<string>,
+  allLayerNames: Array<string>
+) => {
+  const changeLayers = instance
+    .getAllLayers()
+    .filter((item) => allLayerNames?.includes(item.getClassName()))
 
-  changeLayers.forEach(layer => {
+  changeLayers.forEach((layer) => {
     layer.setVisible(activeNames?.includes(layer.getClassName()))
   })
 }
 
 const getLayerByName = (name: string) => {
-  return instance.getAllLayers().find(item => item.getClassName() === name)
+  return instance.getAllLayers().find((item) => item.getClassName() === name)
 }
 
 /**
@@ -222,15 +242,19 @@ const getLayerByName = (name: string) => {
  * @param ratioArray
  * @param config
  */
-export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05, 0.55, 0.05], config = {
-  zoom: 12,
-  maxZoom: 18,
-  minZoom: 10,
-  baseLayer: 'vec-layer',
-  projection: 'EPSG:4326',
-  center: [121.428599, 28.661378],
-  token: 'c77eddc667c5bed016fded560baf93e7'
-}) => {
+export const createMapInstance = (
+  rgb: number[] | undefined,
+  ratioArray = [0.05, 0.55, 0.05],
+  config = {
+    zoom: 12,
+    maxZoom: 18,
+    minZoom: 10,
+    baseLayer: 'vec-layer',
+    projection: 'EPSG:4326',
+    center: [121.428599, 28.661378],
+    token: 'c77eddc667c5bed016fded560baf93e7'
+  }
+) => {
   let _config = config
   if (!config) {
     _config = {
@@ -243,18 +267,24 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
       token: 'c77eddc667c5bed016fded560baf93e7'
     }
   }
-  const {
-    baseVecLayer,
-    baseCvaLayer,
-    baseImgLayer,
-    baseCiaLayer
-  } = baseLayers(_config.token || 'c77eddc667c5bed016fded560baf93e7')
+  const { baseVecLayer, baseCvaLayer, baseImgLayer, baseCiaLayer } = baseLayers(
+    _config.token || 'c77eddc667c5bed016fded560baf93e7'
+  )
 
-  const layers = config.baseLayer === 'img-layer' ? [baseImgLayer, baseCiaLayer] : [baseVecLayer, baseCvaLayer]
+  const layers =
+    config.baseLayer === 'img-layer'
+      ? [baseImgLayer, baseCiaLayer]
+      : [baseVecLayer, baseCvaLayer]
   if (!instance) {
     instance = new Map({
-      layers: rgb ? [changeLayer(layers[0], rgb, ratioArray), changeLayer(layers[1], rgb, ratioArray)] : layers,
-      view: new View(Object.assign(
+      layers: rgb
+        ? [
+          changeLayer(layers[0], rgb, ratioArray),
+          changeLayer(layers[1], rgb, ratioArray)
+        ]
+        : layers,
+      view: new View(
+        Object.assign(
           {
             zoom: 8,
             minZoom: 10,
@@ -278,7 +308,11 @@ export const createMapInstance = (rgb: number[] | undefined, ratioArray = [0.05,
     instance.removeLayerByName = removeLayerByName
     instance.changeLayersByNames = changeLayersByNames
     instance.on('pointermove', (evt: any) => {
-      instance.getTargetElement().style.cursor = instance.hasFeatureAtPixel(evt.pixel) ? 'pointer' : ''
+      instance.getTargetElement().style.cursor = instance.hasFeatureAtPixel(
+        evt.pixel
+      )
+        ? 'pointer'
+        : ''
     })
     return instance
   }
@@ -306,13 +340,17 @@ export const createText = (item: DataItemConfig) => {
  * 创建Overlay
  * @param config
  */
-export const createOverlay = (config: Options = { id: 'popup-container', positioning: 'center-center' }) => {
-  return new Overlay(Object.assign(
-    {
-      element: document.getElementById(<string>config.id) || undefined
-    },
-    config
-  ))
+export const createOverlay = (
+  config: Options = { id: 'popup-container', positioning: 'center-center' }
+) => {
+  return new Overlay(
+    Object.assign(
+      {
+        element: document.getElementById(<string>config.id) || undefined
+      },
+      config
+    )
+  )
 }
 
 /**
@@ -320,7 +358,10 @@ export const createOverlay = (config: Options = { id: 'popup-container', positio
  * @param item
  * @param active
  */
-export const createIconStyle = (item: DataItemConfig, active: boolean = false) => {
+export const createIconStyle = (
+  item: DataItemConfig,
+  active: boolean = false
+) => {
   return new Style({
     image: new Icon({
       scale: item.scale || 1,
@@ -346,11 +387,14 @@ export const createMarker = (item: DataItemConfig, config: LayerConfig) => {
  * @param dataList
  * @param config
  */
-export const createMarkersLayer = (dataList: Array<DataItemConfig>, config: LayerConfig) => {
+export const createMarkersLayer = (
+  dataList: Array<DataItemConfig>,
+  config: LayerConfig
+) => {
   const { layerName, visible = true, zIndex = 10 } = config
   const markSource = new VectorSource()
 
-  dataList.forEach(item => {
+  dataList.forEach((item) => {
     const feature = createMarker(item, config)
     markSource.addFeature(feature)
   })
@@ -363,17 +407,31 @@ export const createMarkersLayer = (dataList: Array<DataItemConfig>, config: Laye
   })
 }
 
-const setElasticMarkerStyle = (featureList: Feature<Geometry>[] | Collection<Feature>, curZoom: number) => {
-  const changeStyle = (featureList: Feature<Geometry>[] | Collection<Feature>, imgKey: string) => {
-    featureList.forEach(feature => {
+const setElasticMarkerStyle = (
+  featureList: Feature<Geometry>[] | Collection<Feature>,
+  curZoom: number
+) => {
+  const changeStyle = (
+    featureList: Feature<Geometry>[] | Collection<Feature>,
+    imgKey: string
+  ) => {
+    featureList.forEach((feature) => {
       const config = feature.get('data')
       if (!config.isSelected) {
-        feature.setStyle(createIconStyle(Object.assign({}, config, { img: config[imgKey] }), false))
+        feature.setStyle(
+          createIconStyle(
+            Object.assign({}, config, { img: config[imgKey] }),
+            false
+          )
+        )
       }
     })
   }
 
-  changeStyle(featureList, curZoom >= 14 ? 'largeImg' : curZoom >= 11 ? 'smallImg' : 'img')
+  changeStyle(
+    featureList,
+    curZoom >= 14 ? 'largeImg' : curZoom >= 11 ? 'smallImg' : 'img'
+  )
 }
 
 /**
@@ -381,7 +439,7 @@ const setElasticMarkerStyle = (featureList: Feature<Geometry>[] | Collection<Fea
  * @param featureList
  */
 export const changeUnselectStyle = (featureList: Collection<Feature>) => {
-  featureList.forEach(feature => {
+  featureList.forEach((feature) => {
     const config = feature.get('data')
     feature.set('data', { ...config, isSelected: false })
     if (config.isElastic) {
@@ -398,8 +456,11 @@ export const changeUnselectStyle = (featureList: Collection<Feature>) => {
  * @param dataList
  * @param config
  */
-export const createElasticMarkerLayer = (dataList: Array<ElasticDataItemConfig>, config: LayerConfig) => {
-  const tempDataList = dataList.map(item => {
+export const createElasticMarkerLayer = (
+  dataList: Array<ElasticDataItemConfig>,
+  config: LayerConfig
+) => {
+  const tempDataList = dataList.map((item) => {
     return {
       ...item,
       isElastic: true
@@ -417,7 +478,6 @@ export const createElasticMarkerLayer = (dataList: Array<ElasticDataItemConfig>,
 
   return vectorLayer
 }
-
 
 /**
  * 创建交互事件
@@ -439,12 +499,14 @@ export const createLayerSelectByNames = (
     const { deselected, selected } = evt
     if (deselected.length) {
       const feature = deselected[0]
-      let config = feature.get('data')
+      const config = feature.get('data')
       if (config.isElastic) {
         feature.set('data', Object.assign(config, { isSelected: false }))
         setElasticMarkerStyle([feature], instance.getView().getZoom()!)
       } else {
-        feature.setStyle(createIconStyle(Object.assign(config, { isSelected: false }), false))
+        feature.setStyle(
+          createIconStyle(Object.assign(config, { isSelected: false }), false)
+        )
       }
       unSelectHandler?.(feature)
     }
@@ -455,7 +517,9 @@ export const createLayerSelectByNames = (
         feature.set('data', Object.assign(config, { isSelected: true }))
         setElasticMarkerStyle([feature], instance.getView().getZoom()!)
       } else {
-        feature.setStyle(createIconStyle(Object.assign(config, { isSelected: true }), true))
+        feature.setStyle(
+          createIconStyle(Object.assign(config, { isSelected: true }), true)
+        )
       }
       selectedHandler?.(feature)
     }
@@ -485,13 +549,15 @@ const formatLength = (line: Geometry) => {
   return output
 }
 
-
 /**
  *
  * @param feature
  * @param drawStyle
  */
-export const getDrawStyle = (feature: FeatureLike, drawStyle: Style | undefined = drawDefaultStyle) => {
+export const getDrawStyle = (
+  feature: FeatureLike,
+  drawStyle: Style | undefined = drawDefaultStyle
+) => {
   const labelStyle = new Style({
     text: new Text({
       font: '14px',
@@ -590,7 +656,11 @@ export const flyToAnimate = (center: Array<any>[number], zoom?: number) => {
  * @param vectorLayer
  * @param openTip
  */
-export const createDrawInteraction = (type: Type = 'Point', vectorLayer: VectorLayer<any>, openTip?: boolean) => {
+export const createDrawInteraction = (
+  type: Type = 'Point',
+  vectorLayer: VectorLayer<any>,
+  openTip?: boolean
+) => {
   return new Draw({
     // @ts-ignore
     source: vectorLayer.getSource(),
@@ -605,29 +675,41 @@ export const createDrawInteraction = (type: Type = 'Point', vectorLayer: VectorL
  * @param style
  * @param config
  */
-export const createGeoJsonLayer = (geoJson: any, style: StyleLike | FlatStyleLike | null | undefined, config?: LayerConfig) => {
+export const createGeoJsonLayer = (
+  geoJson: any,
+  style: StyleLike | FlatStyleLike | null | undefined,
+  config?: LayerConfig
+) => {
   const { layerName } = config || {}
-  const layerConfig = Object.assign({
-    className: layerName ? layerName : 'ol-layer',
-    source: new VectorSource({
-      features: new GeoJSON().readFeatures(geoJson)
-    }),
-    style: style ? style : new Style({
-      stroke: new Stroke({
-        color: 'red',
-        lineDash: [10],
-        width: 3
+  const layerConfig = Object.assign(
+    {
+      className: layerName ? layerName : 'ol-layer',
+      source: new VectorSource({
+        features: new GeoJSON().readFeatures(geoJson)
       }),
-      fill: new Fill({
-        color: 'rgba(0, 0, 255, 0.1)'
-      })
-    })
-  }, config ? config : {})
+      style: style
+        ? style
+        : new Style({
+          stroke: new Stroke({
+            color: 'red',
+            lineDash: [10],
+            width: 3
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 255, 0.1)'
+          })
+        })
+    },
+    config ? config : {}
+  )
 
   return new VectorLayer(layerConfig)
 }
 
-export const createMoveMarkerLayer = (dataItem: DataItemConfig, config: LayerConfig) => {
+export const createMoveMarkerLayer = (
+  dataItem: DataItemConfig,
+  config: LayerConfig
+) => {
   const marker = createMarker(dataItem, config)
   const { layerName } = config
   const vectorSource = new VectorSource({
@@ -649,17 +731,15 @@ export const createMoveMarkerLayer = (dataItem: DataItemConfig, config: LayerCon
   }
 }
 
-
 /**
  * 废弃地图
  */
 export const disposeInstance = () => {
   const layers = instance.getAllLayers()
-  layers.forEach(layer => {
+  layers.forEach((layer) => {
     instance.removeLayer(layer)
   })
   instance.setTarget('')
   // @ts-ignore
   instance = undefined
 }
-

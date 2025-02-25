@@ -1,0 +1,38 @@
+{
+  "name": "venus-amap",
+  "version": "0.0.39",
+  "description": "Amap utils library",
+  "files": [
+    "dist"
+  ],
+  "author": "Tomxuetao",
+  "license": "ISC",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "preinstall": "npx only-allow pnpm"
+  },
+  "keywords": [
+    "map",
+    "amap",
+    "amap-utils"
+  ],
+  "dependencies": {
+    "mitt": "^3.0.1",
+    "gcoord": "^1.0.7",
+    "tile-lnglat-transform": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/amap-js-api": "^1.4.16"
+  }
+}
