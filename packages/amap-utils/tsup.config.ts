@@ -4,7 +4,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   minify: true,
-  splitting: false,
+  splitting: true,
   format: ['esm', 'cjs'],
   entry: ['src/index.ts']
 })
