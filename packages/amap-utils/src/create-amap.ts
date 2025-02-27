@@ -20,7 +20,7 @@ export const createAMapInstance = async (
     dragEnable: true,
     pitchEnable: false,
     center: mapCenter,
-    layers: []
+    layers: [createBaseImageLayer()]
   }
 ) => {
   if (instance) {
