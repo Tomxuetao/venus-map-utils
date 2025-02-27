@@ -1,5 +1,7 @@
 import gcoord from 'gcoord'
-import type { BaseLayerConfig, CustomFlexibleLayer, LngLat } from './types.ts'
+import type {
+  BaseLayerConfig, CustomFlexibleLayer, LngLat 
+} from './types.ts'
 
 export const math_sinh = (x: number) => (Math.exp(x) - Math.exp(-x)) / 2
 

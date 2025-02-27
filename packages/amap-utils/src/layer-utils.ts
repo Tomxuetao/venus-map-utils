@@ -1,6 +1,7 @@
 import emitter from './emitter'
 import { instance } from './create-amap'
-import type {Marker,
+import type {
+  Marker,
   Polygon,
   Polyline,
   MassData,
@@ -10,7 +11,8 @@ import type {Marker,
   LineConfig,
   IconConfig,
   GetImgUrlFn,
-  OverlayGroup} from './types.ts'
+  OverlayGroup
+} from './types.ts'
 
 /**
  * 重置激活的矢量数据
@@ -454,28 +456,26 @@ export const addMassMarksLayer = (getImgUrlFn: GetImgUrlFn) => {
     )
     if (hasLine) {
       massMarksLayer._hasLine = true
+      const vectorLayer = createVectorLineLayer(dataList, {
+        key: 'line',
+        strokeColor: 'rgba(29, 235, 255, 0.8)'
+      })
       // @ts-ignore
-      instance.add(
-        createVectorLineLayer(dataList, {
-          key: 'line',
-          strokeColor: 'rgba(29, 235, 255, 0.8)'
-        })
-      )
+      instance.add(vectorLayer)
     }
 
     if (hasFace) {
       massMarksLayer._hasFace = true
+      const vectorLayer = createVectorFaceLayer(dataList, {
+        key: 'faceList',
+        fillOpacity: 0.1,
+        fillColor: '#4247DF',
+        strokeWeight: 1,
+        strokeColor: '#4247DF',
+        strokeStyle: 'dashed'
+      })
       // @ts-ignore
-      instance.add(
-        createVectorFaceLayer(dataList, {
-          key: 'faceList',
-          fillOpacity: 0.1,
-          fillColor: '#4247DF',
-          strokeWeight: 1,
-          strokeColor: '#4247DF',
-          strokeStyle: 'dashed'
-        })
-      )
+      instance.add(vectorLayer)
     }
     massMarksLayer._isDynamic = isDynamic
     massMarksLayer.setMap(instance)

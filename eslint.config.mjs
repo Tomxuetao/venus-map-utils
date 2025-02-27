@@ -14,7 +14,7 @@ export default tseslint.config(
         sourceType: 'module',
         parser: '@typescript-eslint/parser'
       },
-      globals: {...globals.node, ...globals.browser, AMap: true}
+      globals: { ...globals.node, ...globals.browser, AMap: true }
     },
     plugins: {
       '@typescript-eslint': typescriptEslint,
@@ -24,20 +24,31 @@ export default tseslint.config(
       ...js.configs.recommended.rules,
       ...typescriptEslint.configs.recommended.rules,
       ...prettierConfig.rules,
-      'prefer-destructuring': ['error', {object: true, array: false}],
+      'prefer-destructuring': ['error', { object: true, array: false }],
       indent: ['error', 2],
       'semi': ['error', 'never'],
       'quotes': ['error', 'single'],
       'comma-dangle': ['error', 'never'],
-      'max-len': ['error', {code: 300}],
+      'max-len': ['error', { code: 300 }],
       'no-param-reassign': 'off',
       'import/extensions': 'off',
       'import/no-unresolved': 'off',
       'import/no-absolute-path': 'off',
       'import/no-extraneous-dependencies': 'off',
-      'no-plusplus': ['off', {allowForLoopAfterthoughts: true}],
-      'newline-per-chained-call': ['error', {ignoreChainWithDepth: 10}],
-      'object-curly-newline': ['error', {ImportDeclaration: 'never', ExportDeclaration: 'never'}],
+      'no-plusplus': ['off', { allowForLoopAfterthoughts: true }],
+      'newline-per-chained-call': ['error', { ignoreChainWithDepth: 10 }],
+      'object-curly-newline': [
+        'error', {
+          ExportDeclaration: {
+            multiline: true,
+            minProperties: 3
+          },
+          ImportDeclaration: {
+            multiline: true,
+            minProperties: 3
+          }
+        }
+      ],
       '@typescript-eslint/camelcase': 'off',
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-unused-vars': 'error',

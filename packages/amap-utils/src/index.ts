@@ -1,12 +1,15 @@
 import emitter from './emitter'
-import {instance,
+import {
+  instance,
   resetMap,
   disposeMap,
   getAMapInstance,
   createAMapInstance,
-  resetZoomAndCenter} from './create-amap'
+  resetZoomAndCenter
+} from './create-amap'
 
-import {removeAllLayers,
+import {
+  removeAllLayers,
   resetActiveVector,
   addMassMarksLayer,
   activeMarkerByUid,
@@ -16,9 +19,11 @@ import {removeAllLayers,
   createAnimationMarker,
   createVectorFaceLayer,
   createVectorLineLayer,
-  updateMarksLayersByStatus} from './layer-utils'
+  updateMarksLayersByStatus
+} from './layer-utils'
 
-export {emitter,
+export {
+  emitter,
   instance,
   resetMap,
   disposeMap,
@@ -35,4 +40,5 @@ export {emitter,
   createAnimationMarker,
   createVectorFaceLayer,
   createVectorLineLayer,
-  updateMarksLayersByStatus}
+  updateMarksLayersByStatus
+}

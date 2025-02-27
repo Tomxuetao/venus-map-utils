@@ -5,17 +5,23 @@ import { Point, Geometry } from 'ol/geom'
 import RasterSource from 'ol/source/Raster'
 import VectorImageLayer from 'ol/layer/Image'
 import { Layer, Vector as VectorLayer } from 'ol/layer'
-import { Collection, Map, View, Feature, Overlay } from 'ol'
+import {
+  Collection, Map, View, Feature, Overlay 
+} from 'ol'
 
-import { Vector as VectorSource, Source, XYZ } from 'ol/source'
+import {
+  Vector as VectorSource, Source, XYZ 
+} from 'ol/source'
 
-import {Icon,
+import {
+  Icon,
   Text,
   Fill,
   Style,
   Stroke,
   RegularShape,
-  Circle as CircleStyle} from 'ol/style'
+  Circle as CircleStyle
+} from 'ol/style'
 
 import { GeoJSON } from 'ol/format'
 import { Options } from 'ol/Overlay'
@@ -662,7 +668,6 @@ export const createDrawInteraction = (
   openTip?: boolean
 ) => {
   return new Draw({
-    // @ts-ignore
     source: vectorLayer.getSource(),
     type: type,
     style: openTip ? (feature) => getDrawStyle(feature, undefined) : undefined
