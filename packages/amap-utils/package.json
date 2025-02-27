@@ -1,6 +1,6 @@
 {
   "name": "venus-amap",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "description": "Amap utils library",
   "files": [
     "dist"
@@ -19,8 +19,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
-    "preinstall": "npx only-allow pnpm"
+    "dev": "tsup --watch"
   },
   "keywords": [
     "map",

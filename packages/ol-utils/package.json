@@ -1,6 +1,6 @@
 {
   "name": "map-venus",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Openlayers utils library",
   "files": [
     "dist"
@@ -19,8 +19,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
-    "preinstall": "npx only-allow pnpm"
+    "dev": "tsup --watch"
   },
   "keywords": [
     "ol",
