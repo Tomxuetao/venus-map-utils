@@ -1,3 +1,4 @@
+import '@amap/amap-jsapi-types'
 export type LngLat = {
   lat: number
   lng: number
@@ -25,7 +26,7 @@ export type GetImgUrl = (name: string, ext?: string) => string
 
 export type GetImgUrlFn = (baseUrl: string) => GetImgUrl
 
-export interface CustomFlexibleLayer extends AMap.TileLayer.Flexible {
+export interface CustomFlexibleLayer extends AMap.TileLayer {
   _layerName?: string
 }
 
@@ -58,7 +59,7 @@ export interface TileLayer extends AMap.TileLayer {
   _isCustom?: boolean
 }
 
-export interface MassData extends AMap.MassMarks.Data {
+export interface MassData extends AMap.MassData {
   style?: number
   _uuid?: string
   lnglat: any
@@ -88,4 +89,8 @@ export type IconConfig = {
   markerIcon: string
   activeScale?: number
   markerSize: [number, number]
+}
+
+export interface CustomMap extends AMap.Map {
+  _massMarksLayers?: MassMarks[]
 }

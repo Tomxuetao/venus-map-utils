@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Vite + Vue + TS</title>
+    <style>
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
+            color: #303133;
+            font-size: 14px;
+        }
+
+        img {
+            vertical-align: middle;
+        }
+
+        .clearfix:before,
+        .clearfix:after {
+            content: " ";
+            display: table;
+        }
+
+        .clearfix:after {
+            clear: both;
+        }
+    </style>
+    <script type="text/javascript">
+      window['_AMapSecurityConfig'] = {
+        securityJsCode: '33c34e9709da1b059af579b94f43004e'
+      }
+    </script>
+    <script src="//webapi.amap.com/maps?v=2.0&key=4e9d8b01926e5f3991178f1de80f516b&plugin=AMap.GeoJSON"></script>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -1,14 +1,16 @@
-import type { MassMarks } from './types.ts'
+import { CustomMap, MassMarks } from './types'
 import { removeAllLayers } from './layer-utils'
 import { createBaseImageLayer } from './base-layer'
 
-export let instance: any
+export let instance: CustomMap
+let mapCenter: [number, number] = [119.72, 29.95]
+
 /**
  * 创建地图实例
  */
 export const createAMapInstance = async (
   container: string = 'container',
-  mapConfig: AMap.Map.Options = {
+  mapConfig: AMap.MapOptions = {
     pitch: 0,
     zoom: 9.25,
     zooms: [9.25, 20],
@@ -17,8 +19,8 @@ export const createAMapInstance = async (
     viewMode: '3D',
     dragEnable: true,
     pitchEnable: false,
-    center: [119.72, 30.12],
-    layers: [createBaseImageLayer()]
+    center: mapCenter,
+    layers: []
   }
 ) => {
   if (instance) {
@@ -34,10 +36,11 @@ export const createAMapInstance = async (
     viewMode: '3D',
     dragEnable: true,
     pitchEnable: false,
-    center: [119.72, 30.12],
+    center: mapCenter,
     layers: [createBaseImageLayer()],
     ...mapConfig
   })
+  mapCenter = mapConfig.center || mapCenter
   instance._massMarksLayers = [] as MassMarks[]
   return instance
 }
@@ -52,8 +55,7 @@ export const getAMapInstance = async (container = 'container') => {
 /**
  * 重置地图缩放和中心点
  */
-export const resetZoomAndCenter = (center = [119.72, 29.95]) => {
-  // @ts-ignore
+export const resetZoomAndCenter = (center = mapCenter) => {
   instance?.setZoomAndCenter(9.25, center, false, 1000)
 }
 
@@ -61,11 +63,9 @@ export const resetZoomAndCenter = (center = [119.72, 29.95]) => {
  * 重置地图
  * @param config
  */
-export const resetMap = (
-  config = { center: [119.72, 29.95], isClearAll: true }
-) => {
+export const resetMap = (config = { center: mapCenter, isClearAll: true }) => {
   removeAllLayers(config.isClearAll)
-  resetZoomAndCenter(config.center || [119.72, 29.95])
+  resetZoomAndCenter(config.center || mapCenter)
 }
 
 /**

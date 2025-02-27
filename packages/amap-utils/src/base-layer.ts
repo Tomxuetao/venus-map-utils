@@ -153,6 +153,7 @@ const cachesMap = new Map()
 export const createBaseImageLayer = (config = layerConfig) => {
   const { tileSize = 256, cacheSize, upstream: urls } = config
   const tileLayer: CustomFlexibleLayer = new AMap.TileLayer.Flexible({
+    // @ts-ignore
     tileSize: tileSize,
     cacheSize: cacheSize,
     createTile: (

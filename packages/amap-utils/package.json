@@ -33,6 +33,6 @@
     "tile-lnglat-transform": "^1.5.0"
   },
   "devDependencies": {
-    "@types/amap-js-api": "^1.4.16"
+   "@amap/amap-jsapi-types": "^0.0.15"
   }
 }

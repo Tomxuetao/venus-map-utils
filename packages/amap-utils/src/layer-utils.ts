@@ -30,9 +30,10 @@ export const resetActiveVector = (type = 'polygon') => {
     }
   }
   // 移除一些附带的Marker标注
-  const targetLayers = instance
-    .getLayers()
-    .filter((layer: TileLayer) => layer._layerName === 'river-marker')
+  const layers = instance?.getLayers() as TileLayer[]
+  const targetLayers = layers.filter(
+    (layer) => layer._layerName === 'river-marker'
+  )
   instance.remove(targetLayers)
 }
 
@@ -57,7 +58,7 @@ export const assembleLineOptions = (
     strokeStyle = 'solid'
   } = config
 
-  const optionsList: AMap.Polyline.Options[] = []
+  const optionsList: AMap.PolylineOptions[] = []
   dataList.forEach((item: { [x: string]: any }) => {
     const pathArray = Array.isArray(item[key])
       ? item[key]
@@ -112,7 +113,7 @@ export const createVectorLineLayer = (
   overlayGroup.addOverlays(polylineList)
 
   if (openClick) {
-    overlayGroup.on('click', ({ target }) => {
+    overlayGroup.on('click', ({ target }: { target: Polyline }) => {
       resetActiveVector('polyline')
       target._isActive = true
       emitter.emit('layer-click', target.getExtData())
@@ -139,7 +140,7 @@ export const assembleFaceOptions = (dataList: any, config: any) => {
     borderWeight = 0
   } = config
 
-  const optionsList: AMap.Polygon.Options[] = []
+  const optionsList: AMap.PolygonOptions[] = []
   dataList.forEach((item: any) => {
     const pathArray = Array.isArray(item[key])
       ? item[key]
@@ -204,7 +205,7 @@ export const createVectorFaceLayer = (
   overlayGroup.addOverlays(polygonList)
 
   if (openClick) {
-    overlayGroup.on('click', ({ target }) => {
+    overlayGroup.on('click', ({ target }: { target: Polyline }) => {
       resetActiveVector()
       target._isActive = true
       emitter.emit('layer-click', target.getExtData())
@@ -223,16 +224,15 @@ export const removeAllLayers = (isClearAll = true) => {
     if (Array.isArray(massMarksLayers)) {
       massMarksLayers.forEach((layer) => {
         layer.clear()
-        layer.setMap(null)
+        instance.remove(layer)
       })
       instance._massMarksLayers = []
     }
     if (isClearAll) {
       instance?.clearMap()
     }
-    instance?.remove(
-      instance?.getLayers().filter((item: TileLayer) => item._isCustom)
-    )
+    const layers = instance?.getLayers() as TileLayer[]
+    instance?.remove(layers.filter((item) => item._isCustom))
   }
 }
 
@@ -242,7 +242,7 @@ export const removeAllLayers = (isClearAll = true) => {
  * @param config
  */
 export const createAnimationMarker = (
-  lnglat: AMap.LocationValue,
+  lnglat: AMap.LngLat,
   config: {
     alarmLevel: number | string
     getAnimationUrl: GetImgUrl
@@ -274,7 +274,7 @@ export const createAnimationMarker = (
  */
 export const resetActiveMarker = () => {
   if (instance) {
-    const massMarksLayers: MassMarks[] = instance._massMarksLayers.filter(
+    const massMarksLayers: MassMarks[] = instance._massMarksLayers!.filter(
       (layer: MassMarks) => layer._isMassMarksLayer && layer._hasActive
     )
     // 重置MassMarksLayer图层数据
@@ -311,7 +311,7 @@ export const resetActiveMarker = () => {
 export const activeMarkerByUid = (getAnimationUrl: GetImgUrl) => {
   return (uid: string, setFitView = true) => {
     resetActiveMarker()
-    const massMarksLayers = instance._massMarksLayers.filter(
+    const massMarksLayers = instance._massMarksLayers!.filter(
       (layer: MassMarks) => layer._isMassMarksLayer
     )
     massMarksLayers.forEach((layer: MassMarks) => {
@@ -331,7 +331,7 @@ export const activeMarkerByUid = (getAnimationUrl: GetImgUrl) => {
           instance.setZoomAndCenter(12, tempData.lnglat, false, 800)
         }
         if (layer._isDynamic) {
-          const styleList = layer.getStyle() as AMap.MassMarks.Style[]
+          const styleList = layer.getStyle() as AMap.MassMarkersStyleOptions[]
           instance.add(
             createAnimationMarker(tempData.lnglat, {
               ...styleList[styleIndex],
@@ -391,7 +391,7 @@ export const buildMassMarksStyles = (getImgUrlFn: GetImgUrlFn) => {
  */
 export const createMassMarksLayer = (
   dataList: MassData[],
-  styleList: AMap.MassMarks.Style[] = [],
+  styleList: AMap.MassMarkersStyleOptions[] = [],
   openClick: boolean = true
 ) => {
   const massMarksLayer: MassMarks = new AMap.MassMarks(dataList, {
@@ -420,7 +420,7 @@ export const createMassMarksLayer = (
     })
   }
 
-  instance._massMarksLayers.push(massMarksLayer)
+  instance._massMarksLayers?.push(massMarksLayer)
   return massMarksLayer
 }
 
@@ -439,15 +439,14 @@ export const addMassMarksLayer = (getImgUrlFn: GetImgUrlFn) => {
       hasLine,
       hasFace
     } = iconConfig
-    const massMarksStyles: AMap.MassMarks.Style[] = buildMassMarksStyles(
-      getImgUrlFn
-    )({
-      baseUrl,
-      markerIcon,
-      markerSize,
-      activeScale: 1.3,
-      statusNum: statusNum || 5
-    })
+    const massMarksStyles: AMap.MassMarkersStyleOptions[] =
+      buildMassMarksStyles(getImgUrlFn)({
+        baseUrl,
+        markerIcon,
+        markerSize,
+        activeScale: 1.3,
+        statusNum: statusNum || 5
+      })
     const massMarksLayer = createMassMarksLayer(
       dataList,
       massMarksStyles,
@@ -455,6 +454,7 @@ export const addMassMarksLayer = (getImgUrlFn: GetImgUrlFn) => {
     )
     if (hasLine) {
       massMarksLayer._hasLine = true
+      // @ts-ignore
       instance.add(
         createVectorLineLayer(dataList, {
           key: 'line',
@@ -465,6 +465,7 @@ export const addMassMarksLayer = (getImgUrlFn: GetImgUrlFn) => {
 
     if (hasFace) {
       massMarksLayer._hasFace = true
+      // @ts-ignore
       instance.add(
         createVectorFaceLayer(dataList, {
           key: 'faceList',
@@ -486,7 +487,7 @@ export const addMassMarksLayer = (getImgUrlFn: GetImgUrlFn) => {
  * 更新图层根据选中状态列表
  */
 export const updateMarksLayersByStatus = (checkedStatusList: any[] = []) => {
-  const massMarksLayers: MassMarks[] = instance._massMarksLayers
+  const massMarksLayers: MassMarks[] = instance._massMarksLayers!
   const tempDataList: MassData[] = []
   massMarksLayers.forEach((layer: MassMarks) => {
     layer.clear()
