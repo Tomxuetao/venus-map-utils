@@ -9,8 +9,8 @@ import { nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { createAMapInstance } from 'venus-amap'
 
 let mapInstance
-const initMapHandler = async () => {
-  mapInstance = await createAMapInstance()
+const initMapHandler = () => {
+  mapInstance = createAMapInstance()
 }
 
 onMounted(() => {

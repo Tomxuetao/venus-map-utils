@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "jsx": "preserve",
     "strict": true,
+    "allowJs": true,
     "target": "ES2015",
     "module": "ESNext",
     "skipLibCheck": true,

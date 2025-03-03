@@ -12,7 +12,8 @@
     "build:ol": "pnpm --dir packages/ol-utils build",
     "build:amap": "pnpm --dir packages/amap-utils build",
     "build:example": "pnpm --dir packages/example build",
-    "lint": "eslint ./packages/**/src --ext .js,.ts,.tsx,.mjs,.cjs --fix"
+    "lint": "eslint ./packages/**/src --ext .js,.ts,.tsx,.mjs,.cjs --fix",
+    "build": "pnpm --dir packages/* build && pnpm --dir packages/amap-utils build"
   },
   "devDependencies": {
     "@changesets/changelog-git": "^0.2.1",
