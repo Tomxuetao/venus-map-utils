@@ -8,7 +8,7 @@ let mapCenter: [number, number] = [119.72, 29.95]
 /**
  * 创建地图实例
  */
-export const createAMapInstance = async (
+export const createAMapInstance = (
   container: string = 'container',
   mapConfig: AMap.MapOptions = {
     pitch: 0,
@@ -48,8 +48,8 @@ export const createAMapInstance = async (
 /**
  * 获取地图实例
  */
-export const getAMapInstance = async (container = 'container') => {
-  return await createAMapInstance(container)
+export const getAMapInstance = (container = 'container') => {
+  return createAMapInstance(container)
 }
 
 /**
