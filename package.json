@@ -7,30 +7,30 @@
     "version": "changeset version",
     "commit": "git add . && git-cz",
     "preinstall": "npx only-allow pnpm",
+    "build": "pnpm --dir packages/* build",
     "dev": "pnpm --dir packages/example dev",
     "build:ol": "pnpm --dir packages/ol-utils build",
     "build:amap": "pnpm --dir packages/amap-utils build",
     "build:example": "pnpm --dir packages/example build",
-    "lint": "eslint ./packages/**/src --ext .js,.ts,.tsx,.mjs,.cjs --fix",
-    "build": "pnpm --dir packages/* build && pnpm --dir packages/amap-utils build"
+    "lint": "eslint ./packages/**/src --ext .js,.ts,.tsx,.mjs,.cjs --fix"
   },
   "devDependencies": {
     "@changesets/changelog-git": "^0.2.1",
     "@changesets/cli": "^2.28.1",
-    "@commitlint/cli": "^19.7.1",
-    "@commitlint/config-conventional": "^19.7.1",
-    "@eslint/js": "^9.21.0",
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@eslint/js": "^9.22.0",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.13.10",
     "@types/serve-static": "^1.15.7",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
-    "eslint": "^9.21.0",
-    "eslint-config-prettier": "^10.1.0",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "git-cz": "^4.9.0",
-    "globals": "^15.15.0",
+    "globals": "^16.0.0",
     "husky": "^9.1.7",
     "nano-staged": "^0.8.0",
     "prettier": "^3.5.3",
@@ -40,7 +40,7 @@
     "typescript-eslint": "^8.26.0"
   },
   "engines": {
-    "pnpm": ">= 9.0.0"
+    "pnpm": ">= 10.0.0"
   },
   "nano-staged": {
     "*.{ts,tsx,js,vue}": "eslint --fix",
