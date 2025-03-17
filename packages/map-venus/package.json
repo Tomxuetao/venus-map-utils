@@ -1,6 +1,8 @@
 {
   "name": "map-venus",
   "version": "0.2.2",
+  "type": "module",
+  "private": true,
   "description": "Openlayers utils library",
   "files": [
     "dist"

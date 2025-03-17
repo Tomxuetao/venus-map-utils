@@ -1,6 +1,8 @@
 {
   "name": "venus-map-utils",
   "license": "ISC",
+  "type": "module",
+  "private": true,
   "scripts": {
     "prepare": "husky",
     "changeset": "changeset",
@@ -9,8 +11,8 @@
     "preinstall": "npx only-allow pnpm",
     "build": "pnpm --dir packages/* build",
     "dev": "pnpm --dir packages/example dev",
-    "build:ol": "pnpm --dir packages/ol-utils build",
-    "build:amap": "pnpm --dir packages/amap-utils build",
+    "build:ol": "pnpm --dir packages/map-venus build",
+    "build:amap": "pnpm --dir packages/venus-amap build",
     "build:example": "pnpm --dir packages/example build",
     "lint": "eslint ./packages/**/src --ext .js,.ts,.tsx,.mjs,.cjs --fix"
   },
@@ -24,8 +26,8 @@
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.13.10",
     "@types/serve-static": "^1.15.7",
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
@@ -37,11 +39,12 @@
     "rollup-plugin-external-globals": "^0.13.0",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.0"
+    "typescript-eslint": "^8.26.1"
   },
   "engines": {
-    "pnpm": ">= 10.0.0"
+    "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
   },
+  "packageManager": "pnpm@10.5.2",
   "nano-staged": {
     "*.{ts,tsx,js,vue}": "eslint --fix",
     "*.{ts,tsx,js,vue,scss}": "prettier --write"

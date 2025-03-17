@@ -7,11 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+packages/*/dist
+packages/*/node_modules
+
 node_modules
 dist
 build
 dist-ssr
-venus-admin
 *.local
 *.zip
 stats.html

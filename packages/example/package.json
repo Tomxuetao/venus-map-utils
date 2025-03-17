@@ -15,9 +15,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
-    "venus-amap": "link:../amap-utils",
-    "venus-map": "link:../ol-utils",
-    "vite": "^6.2.1",
+    "venus-amap": "link:../venus-amap",
+    "venus-map": "link:../map-venus",
+    "vite": "^6.2.2",
     "vue-tsc": "^2.2.8"
   }
 }
