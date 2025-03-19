@@ -12,7 +12,7 @@ class ImgLoader {
     onload: (img: HTMLImageElement) => void,
     onerror: (url: string) => void,
     maxRetries: number = 3,
-    retryDelay: number = 500,
+    retryDelay: number = 0
   ) {
     this.url = url
     this.onload = onload

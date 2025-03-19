@@ -2,16 +2,15 @@
   "name": "venus-map-utils",
   "license": "ISC",
   "type": "module",
-  "private": true,
   "scripts": {
     "prepare": "husky",
     "changeset": "changeset",
     "version": "changeset version",
     "commit": "git add . && git-cz",
     "preinstall": "npx only-allow pnpm",
-    "build": "pnpm --dir packages/* build",
     "dev": "pnpm --dir packages/example dev",
     "build:ol": "pnpm --dir packages/map-venus build",
+    "build": "pnpm -r --filter='./packages/*' run build",
     "build:amap": "pnpm --dir packages/venus-amap build",
     "build:example": "pnpm --dir packages/example build",
     "lint": "eslint ./packages/**/src --ext .js,.ts,.tsx,.mjs,.cjs --fix"

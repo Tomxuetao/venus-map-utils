@@ -5,18 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "preview": "vite preview",
-    "build": "vue-tsc -b && vite build"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "ol": "^10.4.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
-    "venus-amap": "link:../venus-amap",
     "venus-map": "link:../map-venus",
+    "venus-amap": "link:../venus-amap",
     "vite": "^6.2.2",
     "vue-tsc": "^2.2.8"
   }

@@ -54,6 +54,11 @@ export const layerConfig: BaseLayerConfig = {
     [120.725803952416, 40.5653723350001]
   ],
   upstream: [
+    'https://ywtg.citybrain.hangzhou.gov.cn/hzsyvector_dark',
+    'https://ywtg.citybrain.hangzhou.gov.cn:9456/hzsyvector_dark',
+    'https://ywtg.citybrain.hangzhou.gov.cn:9457/hzsyvector_dark',
+    'https://ywtg.citybrain.hangzhou.gov.cn:9458/hzsyvector_dark',
+    'https://ywtg.citybrain.hangzhou.gov.cn:9459/hzsyvector_dark',
     'https://cb.hangzhoumap.gov.cn/E36CCEA93443D1495DB9B9F2B2FFE348CB1A367D75176F815040AB19E54CDCA5DAAA25813AF965E2ABD0CC2463DD1223/PBS/rest/services/hzsyvector_dark/Mapserver/tile'
   ]
 }
