@@ -2,24 +2,16 @@ class ImgLoader {
   url: string
   onload: (img: HTMLImageElement) => void
   onerror: (url: string) => void
-  maxRetries: number
-  retryDelay: number
-  currentAttempt: number
   called: boolean
 
   constructor(
     url: string,
     onload: (img: HTMLImageElement) => void,
-    onerror: (url: string) => void,
-    maxRetries: number = 3,
-    retryDelay: number = 0
+    onerror: (url: string) => void
   ) {
     this.url = url
     this.onload = onload
     this.onerror = onerror
-    this.maxRetries = maxRetries
-    this.retryDelay = retryDelay
-    this.currentAttempt = 0
     this.called = false
     this.loadImg()
   }
@@ -37,15 +29,8 @@ class ImgLoader {
     }
 
     img.onerror = (): void => {
-      this.currentAttempt++
-      if (this.currentAttempt <= this.maxRetries && !this.called) {
-        setTimeout(() => {
-          this.loadImg()
-        }, this.retryDelay)
-      } else if (!this.called) {
-        this.onerror(this.url)
-        this.called = true
-      }
+      this.onerror(this.url)
+      this.called = true
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "venus-amap",
-  "version": "0.0.48",
+  "version": "0.1.0",
   "type": "module",
   "description": "Amap utils library",
   "files": [

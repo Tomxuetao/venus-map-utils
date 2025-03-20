@@ -6,12 +6,10 @@ import RasterSource from 'ol/source/Raster'
 import VectorImageLayer from 'ol/layer/Image'
 import { Layer, Vector as VectorLayer } from 'ol/layer'
 import {
-  Collection, Map, View, Feature, Overlay 
+  Collection, Map, View, Feature, Overlay
 } from 'ol'
 
-import {
-  Vector as VectorSource, Source, XYZ 
-} from 'ol/source'
+import { Vector as VectorSource, Source, XYZ } from 'ol/source'
 
 import {
   Icon,

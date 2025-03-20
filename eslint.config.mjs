@@ -41,11 +41,11 @@ export default tseslint.config(
         'error', {
           ExportDeclaration: {
             multiline: true,
-            minProperties: 3
+            minProperties: 5
           },
           ImportDeclaration: {
             multiline: true,
-            minProperties: 3
+            minProperties: 5
           }
         }
       ],

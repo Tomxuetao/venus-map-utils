@@ -1,8 +1,5 @@
 import gcoord from 'gcoord'
-import ImgLoader from './ImgLoader'
-import type {
-  BaseLayerConfig, CustomFlexibleLayer, LngLat
-} from './types.ts'
+import type { BaseLayerConfig, CustomFlexibleLayer, LngLat } from './types.ts'
 
 export const math_sinh = (x: number) => (Math.exp(x) - Math.exp(-x)) / 2
 
@@ -35,6 +32,41 @@ export const pixelToLnglat = (
   return {
     lng: pixelXToLng(pixelX, tileX, level),
     lat: pixelYToLat(pixelY, tileY, level)
+  }
+}
+
+export class ImgLoader {
+  url: string
+  onload: (img: HTMLImageElement) => void
+  onerror: (url: string) => void
+  called: boolean
+
+  constructor(
+    url: string,
+    onload: (img: HTMLImageElement) => void,
+    onerror: (url: string) => void
+  ) {
+    this.url = url
+    this.onload = onload
+    this.onerror = onerror
+    this.called = false
+    this.loadImg()
+  }
+
+  loadImg() {
+    const img = new Image()
+    img.crossOrigin = 'Anonymous'
+    img.src = this.url
+    // 加载完成
+    img.onload = () => {
+      if (!this.called) {
+        this.onload(img)
+        this.called = true
+      }
+    }
+    img.onerror = () => {
+      this.onerror(this.url)
+    }
   }
 }
 
@@ -121,8 +153,10 @@ const getXYZByLevelAndConfig = (
   }
 }
 
+const cachesMap = new Map()
+
 export const createBaseImageLayer = (config = layerConfig) => {
-  const { tileSize = 256, cacheSize, upstream: urls } = config
+  const { tileSize = 256, cacheSize, upstream } = config
   const tileLayer: CustomFlexibleLayer = new AMap.TileLayer.Flexible({
     // @ts-ignore
     tileSize: tileSize,
@@ -133,7 +167,7 @@ export const createBaseImageLayer = (config = layerConfig) => {
       z: number,
       success: (canvas: HTMLCanvasElement) => void
     ) => {
-      const targetUrl = urls[(x + y + z) % urls.length]
+      const targetUrl = upstream[Math.abs(x + y) % upstream.length]
       const canvas = document.createElement('canvas')
       canvas.width = tileSize
       canvas.height = tileSize
@@ -175,26 +209,43 @@ export const createBaseImageLayer = (config = layerConfig) => {
             ctx.imageSmoothingQuality = 'high'
             tempAll.push(
               new Promise<void>((resolve) => {
-                new ImgLoader(
-                  tempUrl,
-                  (image) => {
-                    ctx.drawImage(
-                      image,
-                      0,
-                      0,
-                      tileSize,
-                      tileSize,
-                      position.x,
-                      position.y,
-                      tileSize * scale[0],
-                      tileSize * scale[1]
-                    )
-                    resolve()
-                  },
-                  () => {
-                    resolve()
-                  }
-                )
+                const image = cachesMap.get(tempZYX)
+                if (image) {
+                  ctx.drawImage(
+                    image,
+                    0,
+                    0,
+                    tileSize,
+                    tileSize,
+                    position.x,
+                    position.y,
+                    tileSize * scale[0],
+                    tileSize * scale[1]
+                  )
+                  resolve()
+                } else {
+                  new ImgLoader(
+                    tempUrl,
+                    (image) => {
+                      ctx.drawImage(
+                        image,
+                        0,
+                        0,
+                        tileSize,
+                        tileSize,
+                        position.x,
+                        position.y,
+                        tileSize * scale[0],
+                        tileSize * scale[1]
+                      )
+                      cachesMap.set(tempZYX, image)
+                      resolve()
+                    },
+                    () => {
+                      resolve()
+                    }
+                  )
+                }
               })
             )
           }
