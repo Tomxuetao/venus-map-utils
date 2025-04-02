@@ -20,16 +20,16 @@
     "@changesets/cli": "^2.28.1",
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^9.23.0",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.13.17",
     "@types/serve-static": "^1.15.7",
-    "@typescript-eslint/eslint-plugin": "^8.26.1",
-    "@typescript-eslint/parser": "^8.26.1",
-    "eslint": "^9.22.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
-    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-prettier": "^5.2.5",
     "git-cz": "^4.9.0",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
@@ -38,7 +38,7 @@
     "rollup-plugin-external-globals": "^0.13.0",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.1"
+    "typescript-eslint": "^8.29.0"
   },
   "engines": {
     "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
