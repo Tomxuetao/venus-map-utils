@@ -1,4 +1,5 @@
 import emitter from './emitter'
+import { createBaseImageLayer } from './base-layer'
 import {
   instance,
   resetMap,
@@ -35,6 +36,7 @@ export {
   resetActiveMarker,
   resetZoomAndCenter,
   createAMapInstance,
+  createBaseImageLayer,
   buildMassMarksStyles,
   createMassMarksLayer,
   createAnimationMarker,

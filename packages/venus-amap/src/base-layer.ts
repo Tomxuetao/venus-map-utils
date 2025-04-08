@@ -11,15 +11,7 @@ export const pixelXToLng = (pixelX: number, tileX: number, level: number) => {
 }
 
 export const pixelYToLat = (pixelY: number, tileY: number, level: number) => {
-  return (
-    (Math.atan(
-      math_sinh(
-        Math.PI * (1 - (2 * (tileY + pixelY / 256.0)) / getMapSize(level))
-      )
-    ) *
-      180.0) /
-    Math.PI
-  )
+  return ((Math.atan(math_sinh(Math.PI * (1 - (2 * (tileY + pixelY / 256.0)) / getMapSize(level)))) * 180.0) / Math.PI)
 }
 
 export const pixelToLnglat = (
@@ -98,26 +90,12 @@ export const layerConfig: BaseLayerConfig = {
 const getWgs84BoundsByXYZ = (x: number, y: number, z: number) => {
   const wgs84NW = pixelToLnglat(0, 0, x, y, z)
   const wgs84SE = pixelToLnglat(0, 0, x + 1, y + 1, z)
-  const arrNW = gcoord.transform(
-    [wgs84NW.lng, wgs84NW.lat],
-    gcoord.GCJ02,
-    gcoord.WGS84
-  )
-  const arrSE = gcoord.transform(
-    [wgs84SE.lng, wgs84SE.lat],
-    gcoord.GCJ02,
-    gcoord.WGS84
-  )
+  const arrNW = gcoord.transform([wgs84NW.lng, wgs84NW.lat], gcoord.GCJ02, gcoord.WGS84)
+  const arrSE = gcoord.transform([wgs84SE.lng, wgs84SE.lat], gcoord.GCJ02, gcoord.WGS84)
 
   return {
-    nw: {
-      lng: arrNW[0],
-      lat: arrNW[1]
-    },
-    se: {
-      lng: arrSE[0],
-      lat: arrSE[1]
-    }
+    nw: { lng: arrNW[0], lat: arrNW[1] },
+    se: { lng: arrSE[0], lat: arrSE[1] }
   }
 }
 
@@ -128,21 +106,14 @@ const getXYZByLevelAndConfig = (
 ) => {
   const { lng, lat } = lngLat
   const { origin, tileSize, resolutions } = config
-  const tempLngLat: LngLat = {
-    lng: lng - origin[0],
-    lat: origin[1] - lat
-  }
+  const tempLngLat: LngLat = { lng: lng - origin[0], lat: origin[1] - lat }
 
   const resolution = resolutions[level]
 
   const tileX: number = Math.floor(tempLngLat.lng / resolution / tileSize)
   const tileY: number = Math.floor(tempLngLat.lat / resolution / tileSize)
-  const pixelX: number = Math.round(
-    tempLngLat.lng / resolution - tileX * tileSize
-  )
-  const pixelY: number = Math.round(
-    tempLngLat.lat / resolution - tileY * tileSize
-  )
+  const pixelX: number = Math.round(tempLngLat.lng / resolution - tileX * tileSize)
+  const pixelY: number = Math.round(tempLngLat.lat / resolution - tileY * tileSize)
 
   return {
     x: tileX,
@@ -155,7 +126,8 @@ const getXYZByLevelAndConfig = (
 
 const cachesMap = new Map()
 
-export const createBaseImageLayer = (config = layerConfig) => {
+export const createBaseImageLayer = (baseConfig = layerConfig) => {
+  const config = Object.assign(layerConfig, baseConfig || {})
   const { tileSize = 256, cacheSize, upstream } = config
   const tileLayer: CustomFlexibleLayer = new AMap.TileLayer.Flexible({
     // @ts-ignore
