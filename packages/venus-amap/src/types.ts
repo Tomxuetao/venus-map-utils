@@ -94,3 +94,7 @@ export type IconConfig = {
 export interface CustomMap extends AMap.Map {
   _massMarksLayers?: MassMarks[]
 }
+
+export interface CustomMapOptions extends AMap.MapOptions {
+  layerStyle?: string
+}

@@ -1,6 +1,6 @@
-import { CustomMap, MassMarks } from './types'
 import { removeAllLayers } from './layer-utils'
-import { createBaseImageLayer } from './base-layer'
+import { CustomMap, CustomMapOptions, MassMarks } from './types'
+import { createBaseImageLayer, layerConfig } from './base-layer'
 
 export let instance: CustomMap
 let mapCenter: [number, number] = [119.72, 29.95]
@@ -10,7 +10,7 @@ let mapCenter: [number, number] = [119.72, 29.95]
  */
 export const createAMapInstance = (
   container: string = 'container',
-  mapConfig: AMap.MapOptions = {
+  mapConfig: CustomMapOptions = {
     pitch: 0,
     zoom: 9.25,
     zooms: [9.25, 20],
@@ -20,7 +20,8 @@ export const createAMapInstance = (
     dragEnable: true,
     pitchEnable: false,
     center: mapCenter,
-    layers: [createBaseImageLayer()]
+    layerStyle: 'dark',
+    layers: [createBaseImageLayer(layerConfig, true)]
   }
 ) => {
   if (instance) {
@@ -37,7 +38,9 @@ export const createAMapInstance = (
     dragEnable: true,
     pitchEnable: false,
     center: mapCenter,
-    layers: [createBaseImageLayer()],
+    layers: [
+      createBaseImageLayer(layerConfig, mapConfig.layerStyle === 'dark')
+    ],
     ...mapConfig
   })
   mapCenter = mapConfig.center || mapCenter

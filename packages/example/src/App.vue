@@ -5,12 +5,14 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { createAMapInstance } from 'venus-amap'
+import { nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 let mapInstance
 const initMapHandler = () => {
-  mapInstance = createAMapInstance()
+  mapInstance = createAMapInstance('container', {
+    layerStyle: ''
+  })
 }
 
 onMounted(() => {
